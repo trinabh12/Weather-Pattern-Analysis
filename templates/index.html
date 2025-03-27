@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Prediction</title>
+</head>
+<body>
+    <h2>Enter Details for Weather Prediction</h2>
+    <form method="POST" action="/">
+        <label for="location">Location:</label>
+        <input type="text" name="location" required>
+    
+        <label for="date">Date:</label>
+        <input type="text" name="date" placeholder="YYYY-MM-DD" required>
+        <p>Format: YYYY-MM-DD (e.g., 2025-04-06)</p>
+    
+        <label for="time">Time:</label>
+        <input type="text" name="time" placeholder="HH:MM:SS" required>
+        <p>Format: HH:MM:SS (e.g., 14:30:00)</p>
+    
+        <button type="submit">Predict</button>
+    </form>
+    
+    {% if prediction %}
+        <h3>Predicted Weather:</h3>
+        <p>Predicted Temperature: {{ prediction['Temperature'] }}°C</p>
+        <p>Predicted Humidity: {{ prediction['Humidity'] }}%</p>
+        <p>Predicted Precipitation: {{ prediction['Precipitation'] }} mm</p>
+        <p>Predicted Wind Speed: {{ prediction['Wind Speed'] }} km/h</p>
+        <p>On {{ request.form['location'] }}, {{ request.form['date'] }} at {{ request.form['time'] }}</p>
+    {% endif %}
+</body>
+</html>
