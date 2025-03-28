@@ -9,7 +9,7 @@ class Knn:
 
     def convert_time_to_hours(self, time_str):
         hours, minutes, _ = map(int, time_str.split(':'))
-        return hours + minutes / 60  # Convert to fractional hours
+        return hours + minutes / 60
 
     def convert_date_to_days(self, date_str):
         current_date = datetime.strptime(date_str, "%Y-%m-%d")
@@ -38,7 +38,7 @@ class Knn:
 
     def calculateWeightedAverage(self, k_neighbors):
         distances = np.array([dist for _, dist in k_neighbors])
-        weights = np.exp(-distances) / np.sum(np.exp(-distances))  # Softmax for better weighting
+        weights = np.exp(-distances) / np.sum(np.exp(-distances))
 
         temperature_values = np.dot(weights, [neighbor['Temperature_C'] for neighbor, _ in k_neighbors])
         humidity_values = np.dot(weights, [neighbor['Humidity_pct'] for neighbor, _ in k_neighbors])
