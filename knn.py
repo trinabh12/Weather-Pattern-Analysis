@@ -1,26 +1,31 @@
 from dataloader import DataFrame
 from collections import Counter
+from datetime import datetime
+import numpy as np
 
 class Knn:
     def __init__(self):
-        self.df_obj = DataFrame() 
-        self.predicted_temperature = 0
-        self.predicted_humidity = 0
-        self.predicted_precipitation = 0
-        self.predicted_windspeed = 0
+        self.df_obj = DataFrame()
+
+    def convert_time_to_hours(self, time_str):
+        hours, minutes, _ = map(int, time_str.split(':'))
+        return hours + minutes / 60  # Convert to fractional hours
+
+    def convert_date_to_days(self, date_str):
+        current_date = datetime.strptime(date_str, "%Y-%m-%d")
+        start_of_year = datetime(current_date.year, 1, 1)
+        return (current_date - start_of_year).days
 
     def calculateManhattanDistance(self, location, time, date):
-        result = self.df_obj.get_rows_by_location(location)  
-        hours, minutes, seconds = map(int, time.split(':'))
-        X = hours
-        year, month, day = map(int, date.split('-'))
-        Y = month * 31 + day
+        result = self.df_obj.get_rows_by_location(location)
+        X = self.convert_time_to_hours(time)
+        Y = self.convert_date_to_days(date)
 
         distances = []
 
         for row in result.collect():
-            row_time = int(row['Date_Time'].hour)
-            row_date = row['Date_Time'].month * 31 + row['Date_Time'].day
+            row_time = self.convert_time_to_hours(row['Date_Time'].strftime('%H:%M:%S'))
+            row_date = self.convert_date_to_days(row['Date_Time'].strftime('%Y-%m-%d'))
 
             distance = abs(X - row_time) + abs(Y - row_date)
             distances.append((row, distance))
@@ -31,20 +36,22 @@ class Knn:
         distances = self.calculateManhattanDistance(location, time, date)
         return distances[:kval]
 
-    def calculateMode(self, k_neighbors):
-        temperature_values = [neighbor[0]['Temperature_C'] for neighbor in k_neighbors]
-        humidity_values = [neighbor[0]['Humidity_pct'] for neighbor in k_neighbors]
-        precipitation_values = [neighbor[0]['Precipitation_mm'] for neighbor in k_neighbors]
-        windspeed_values = [neighbor[0]['Wind_Speed_kmh'] for neighbor in k_neighbors]
-        
-        self.predicted_temperature = Counter(temperature_values).most_common(1)[0][0]
-        self.predicted_humidity = Counter(humidity_values).most_common(1)[0][0]
-        self.predicted_precipitation = Counter(precipitation_values).most_common(1)[0][0]
-        self.predicted_windspeed = Counter(windspeed_values).most_common(1)[0][0]
-    
+    def calculateWeightedAverage(self, k_neighbors):
+        distances = np.array([dist for _, dist in k_neighbors])
+        weights = np.exp(-distances) / np.sum(np.exp(-distances))  # Softmax for better weighting
+
+        temperature_values = np.dot(weights, [neighbor['Temperature_C'] for neighbor, _ in k_neighbors])
+        humidity_values = np.dot(weights, [neighbor['Humidity_pct'] for neighbor, _ in k_neighbors])
+        precipitation_values = np.dot(weights, [neighbor['Precipitation_mm'] for neighbor, _ in k_neighbors])
+        windspeed_values = np.dot(weights, [neighbor['Wind_Speed_kmh'] for neighbor, _ in k_neighbors])
+
         return {
-            "Temperature": self.predicted_temperature,
-            "Humidity": self.predicted_humidity,
-            "Precipitation": self.predicted_precipitation,
-            "Wind Speed": self.predicted_windspeed
+            "Temperature": temperature_values,
+            "Humidity": humidity_values,
+            "Precipitation": precipitation_values,
+            "Wind Speed": windspeed_values
         }
+
+    def predict(self, kval, location, time, date):
+        k_neighbors = self.kNearestNeighbors(kval, location, time, date)
+        return self.calculateWeightedAverage(k_neighbors)

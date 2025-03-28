@@ -4,6 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            text-align: left;
+        }
+        label, input, p {
+            display: block;
+            margin: 10px 0;
+        }
+        input {
+            padding: 8px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #218838;
+        }
+        h2, h3 {
+            color: #333;
+        }
+        .prediction {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <h2>Enter Details for Weather Prediction</h2>
@@ -23,12 +71,14 @@
     </form>
     
     {% if prediction %}
-        <h3>Predicted Weather:</h3>
-        <p>Predicted Temperature: {{ prediction['Temperature'] }}°C</p>
-        <p>Predicted Humidity: {{ prediction['Humidity'] }}%</p>
-        <p>Predicted Precipitation: {{ prediction['Precipitation'] }} mm</p>
-        <p>Predicted Wind Speed: {{ prediction['Wind Speed'] }} km/h</p>
-        <p>On {{ request.form['location'] }}, {{ request.form['date'] }} at {{ request.form['time'] }}</p>
+        <div class="prediction">
+            <h3>Predicted Weather:</h3>
+            <p><strong>Predicted Temperature:</strong> {{ prediction['Temperature'] }}°C</p>
+            <p><strong>Predicted Humidity:</strong> {{ prediction['Humidity'] }}%</p>
+            <p><strong>Predicted Precipitation:</strong> {{ prediction['Precipitation'] }} mm</p>
+            <p><strong>Predicted Wind Speed:</strong> {{ prediction['Wind Speed'] }} km/h</p>
+            <p>On <strong>{{ request.form['location'] }}</strong>, {{ request.form['date'] }} at {{ request.form['time'] }}</p>
+        </div>
     {% endif %}
 </body>
 </html>

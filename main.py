@@ -12,8 +12,7 @@ def index():
         date = request.form['date']
         time = request.form['time']
         
-        k_neighbors = knn_model.kNearestNeighbors(10, location, time, date)
-        prediction = knn_model.calculateMode(k_neighbors)
+        prediction = knn_model.predict(15, location, time, date)
     
     return render_template('index.html', prediction=prediction)
 
